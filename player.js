@@ -16,56 +16,67 @@ console.log(`\n🎵 Select a number to play the song`);
 process.stdin.setEncoding("utf-8");
 process.stdin.setRawMode(true);
 
+let childProcess = null;
+
 process.stdin.on("data", (input) => {
-  // console.log(+input.toString());
-  const userInput = input.trim().toString();
-  if (userInput === 'p') {
-    childProcess.kill()
-    process.stdin.setRawMode(false)
-    process.exit(0)
+  const userInput = input.toString().trim();
+
+  // Pause
+  if (userInput === "p") {
     pause();
   }
 
-  if (userInput === 'r') {
+  // Resume
+  if (userInput === "r") {
     resume();
   }
 
-  if (userInput > 0 && userInput < songs.length) {
-    player(+userInput)
+  // Quit
+  if (userInput === "q") {
+    stop();
+    process.stdin.setRawMode(false);
+    process.exit(0);
   }
 
-  // player(+userInput);
+  // Select song
+  if (userInput > 0 && userInput <= songs.length) {
+    player(+userInput);
+  }
 });
-
-let childProcess = null;
-
 
 function player(userInput) {
   console.log(`Selected Song: ${songs[userInput - 1]}`);
+
   if (childProcess) {
-    childProcess.kill();
+    childProcess.kill("SIGKILL");
   }
 
   childProcess = spawn("afplay", [`./songs/${songs[userInput - 1]}`]);
+
   childProcess.on("close", () => {
     console.log("Song finished...");
-    process.exit(0);
   });
 }
 
 function pause() {
   if (childProcess) {
-    childProcess.kill('SIGSTOP')
-    console.log("Song Paused...")
-    //SIGSTOP
-
+    childProcess.kill("SIGSTOP");
+    console.log("Song Paused...");
   }
 }
 
 function resume() {
   if (childProcess) {
-    childProcess.kill('SIGCONT')
-    console.log("Song Resumed")
-    //SIGCONT
+    childProcess.kill("SIGCONT");
+    console.log("Song Resumed...");
+  }
+}
+
+function stop() {
+  if (childProcess) {
+    childProcess.kill("SIGCONT");
+    childProcess.kill("SIGKILL");
+    childProcess = null;
+    console.log("Song Stopped...");
   }
 }
