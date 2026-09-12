@@ -1,6 +1,5 @@
 const fs = require("fs");
 
-const ui = require("./ui");
 const {
   player,
   pause,
@@ -8,11 +7,10 @@ const {
   stop
 } = require("./player");
 
-const path = "./songs";
+const ui = require("./ui");
 
-const songs = fs
-  .readdirSync(path)
-  .filter((el) => el.endsWith(".mp3"));
+const songs = fs.readdirSync("./songs")
+  .filter((file) => file.endsWith(".mp3"));
 
 let selected = 1;
 
@@ -20,7 +18,6 @@ ui.showSongs(songs, selected);
 
 process.stdin.setEncoding("utf-8");
 process.stdin.setRawMode(true);
-process.stdin.resume();
 
 process.stdin.on("data", (input) => {
 
@@ -29,47 +26,41 @@ process.stdin.on("data", (input) => {
     stop();
 
     process.stdin.setRawMode(false);
-    process.stdin.pause();
-
     process.exit(0);
   }
 
-  // Up Arrow
+  // Up arrow
   if (input[2] === "A") {
-
-    if (selected === 1) return;
-
-    selected--;
-
-    ui.showSongs(songs, selected);
+    if (selected > 1) {
+      selected--;
+      ui.showSongs(songs, selected);
+    }
   }
 
-  // Down Arrow
+  // Down arrow
   if (input[2] === "B") {
-
-    if (selected === songs.length) return;
-
-    selected++;
-
-    ui.showSongs(songs, selected);
+    if (selected < songs.length) {
+      selected++;
+      ui.showSongs(songs, selected);
+    }
   }
 
-  // Play
+  // Enter = Play
   if (input === "\r") {
     player(selected, songs);
   }
 
-  // Pause
+  // P = Pause
   if (input === "p") {
     pause();
   }
 
-  // Resume
+  // R = Resume
   if (input === "r") {
     resume();
   }
 
-  // Stop
+  // S = Stop
   if (input === "s") {
     stop();
   }
