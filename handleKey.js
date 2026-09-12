@@ -1,42 +1,76 @@
-const songs = ["Queen", "Redbone", "Sample", "Dhurandhar"];
+const fs = require("fs");
+
+const ui = require("./ui");
+const {
+  player,
+  pause,
+  resume,
+  stop
+} = require("./player");
+
+const path = "./songs";
+
+const songs = fs
+  .readdirSync(path)
+  .filter((el) => el.endsWith(".mp3"));
 
 let selected = 1;
-showSongs();
+
+ui.showSongs(songs, selected);
 
 process.stdin.setEncoding("utf-8");
 process.stdin.setRawMode(true);
+process.stdin.resume();
 
 process.stdin.on("data", (input) => {
+
+  // Quit
   if (input === "q") {
+    stop();
+
     process.stdin.setRawMode(false);
+    process.stdin.pause();
+
     process.exit(0);
   }
 
   // Up Arrow
-if (input[2] === 'A') {
-  if(selected===0)return 
-  selected--
-  process.stdout.write(`\x1b[${songs.length}A`)
-  showSongs()
-}
+  if (input[2] === "A") {
+
+    if (selected === 1) return;
+
+    selected--;
+
+    ui.showSongs(songs, selected);
+  }
 
   // Down Arrow
-if (input[2] === 'B') {
-  if(selected===songs.length)return 
-  selected++
-  process.stdout.write(`\x1b[${songs.length}A`)
-  showSongs()
+  if (input[2] === "B") {
+
+    if (selected === songs.length) return;
+
+    selected++;
+
+    ui.showSongs(songs, selected);
+  }
+
+  // Play
+  if (input === "\r") {
+    player(selected, songs);
+  }
+
+  // Pause
+  if (input === "p") {
+    pause();
+  }
+
+  // Resume
+  if (input === "r") {
+    resume();
+  }
+
+  // Stop
+  if (input === "s") {
+    stop();
   }
 });
-
-function showSongs() {
-  for (let i = 0; i < songs.length; i++) {
-    process.stdout.write('\x1b[2K')
-      //Clear line
-        if (selected===i+1) {
-          console.log(`->${i + 1}: ${songs[i]}`);
-        } else {
-            console.log(`${i + 1}: ${songs[i]}`);
-      }
-  }
-}
