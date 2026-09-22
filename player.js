@@ -47,17 +47,23 @@ function resume() {
   }
 }
 
-function stop() {
-  if (childProcess) {
+function stop(callback) {
+    if (childProcess) {
+        manuallyStopped = true;
 
-    // Tell the close event this was a manual stop
-    manuallyStopped = true;
+        childProcess.once("close", () => {
+            childProcess = null;
 
-    childProcess.kill("SIGTERM");
-    childProcess = null;
+            if (callback) {
+                callback();
+            }
+        });
 
-    ui.showStopped();
-  }
+        childProcess.kill("SIGTERM");
+        ui.showStopped();
+    } else if (callback) {
+        callback();
+    }
 }
 
 module.exports = {

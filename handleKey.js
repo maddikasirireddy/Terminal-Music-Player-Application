@@ -23,11 +23,11 @@ process.stdin.on("data", (input) => {
 
   // Quit
   if (input === "q") {
-    stop();
-
-    process.stdin.setRawMode(false);
-    process.exit(0);
-  }
+    stop(() => {
+        process.stdin.setRawMode(false);
+        process.exit(0);
+    });
+}
 
   // Up arrow
   if (input[2] === "A") {
